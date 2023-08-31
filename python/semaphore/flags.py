@@ -165,6 +165,10 @@ class Flags:
         """
         return all(self.is_set(bit) for bit in bits)
 
+    
+    def len(self):
+        return len(self.data)
+
 
     def _resolve_bit_as_int(self, bit: BitResolvable):
         if isinstance(bit, int):
@@ -213,16 +217,22 @@ class FlagsArray:
         else:
             self.reference = reference
         
+        self._size = 0
         self._num_flags = len(flags)
-        self._size = max(len(flag.data) for flag in flags)
-        self.data = bytearray()
+        
+        array_data = []
         for item in flags:
             if not isinstance(item, Flags):
                 data = Flags(item).data
             else:
                 data = item.data
+            
+            self._size = max(self._size, len(data))
+            array_data.append(data)
+        
+        self.data = bytearray()
+        for data in array_data:
             self.data.extend(data.ljust(self._size, b'\x00'))
-
         return None
     
     def __repr__(self):
