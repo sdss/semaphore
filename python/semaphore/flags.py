@@ -1,6 +1,8 @@
 import numpy as np
 from typing import Union, Optional, Tuple, Iterable
 
+from semaphore.reference import FlagsReference
+
 BitResolvable = Union[int, str]
 
 class Flags:
@@ -205,21 +207,29 @@ class FlagsArray:
 
     def __init__(
         self, 
-        flags, #: Iterable[Union["Flags", BitResolvable]], 
-        reference=None
+        flags: Iterable[Union[Flags, BitResolvable]], 
+        reference: Optional[FlagsReference] = None
     ) -> None:
+        """
+        Initialize a new FlagsArray object.
+        
+        :param flags:
+            An iterable of flags to initialize the array with.
+            
+        :param reference: [optional]
+            A reference to use when interpreting bits as strings.
+        """
 
-        # TODO: Make this class mutable with some clever hacks
+        # TODO: Should we make this class mutable with some clever hacks?
 
-        # one giant bytearray, where each needs to be the same padded length to avoid index hell            
         if reference is None and isinstance(flags[0], Flags) and flags[0].reference is not None:
             self.reference = flags[0].reference
         else:
             self.reference = reference
         
+        # one giant bytearray, where each needs to be the same padded length to avoid index hell            
         self._size = 0
-        self._num_flags = len(flags)
-        
+        self._num_flags = len(flags)        
         array_data = []
         for item in flags:
             if not isinstance(item, Flags):
@@ -234,17 +244,15 @@ class FlagsArray:
         for data in array_data:
             self.data.extend(data.ljust(self._size, b'\x00'))
         return None
-    
-    def __repr__(self):
-        return f"<{self.__class__.__name__} with {self._num_flags} flags at {hex(id(self))}>"
-    
+        
+
     # TODO:
     # def bits, flags
+
 
     def is_set(self, bit: BitResolvable) -> bool:
         num, offset = divmod(self._resolve_bit_as_int(bit), 8)
         return (np.array(self.data[num::self._size]) & (1 << offset)).astype(bool)
-
 
     def are_any_set(self, *bits: Iterable[BitResolvable]) -> np.array:
         return self._op_is_set(np.any, *bits)
@@ -270,6 +278,11 @@ class FlagsArray:
                 return self.reference[bit]
             except:
                 if self.reference is None:
-                    raise ValueError("Cannot interpret bit as string without flag reference")
+                    raise ValueError("Cannot interpret bit as string without flag reference")  
                 else:
-                    raise ValueError(f"Cannot interpret bit '{bit}' from reference")                
+                    raise ValueError(f"Cannot interpret bit '{bit}' from reference")
+
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__} with {self._num_flags} items at {hex(id(self))}>"
+
