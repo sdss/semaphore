@@ -1,3 +1,4 @@
+import numpy as np
 from collections import OrderedDict
 from typing import Union, Iterable
 
@@ -41,8 +42,7 @@ class FlagsReference:
             definitions[row[flag_name_key]] = dict(row)
         
         return cls(definitions)
-        
-
+    
 
     def by_attribute(self, key, value, return_bits=True):
         """

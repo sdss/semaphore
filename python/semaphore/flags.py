@@ -55,6 +55,14 @@ class Flags:
             bit += 1
         return tuple(bits)
 
+    
+    @property
+    def flags(self):
+        """Return a tuple of all flag names that are set."""
+        if self.reference is None:
+            raise ValueError("Cannot return flag names without a flag reference")
+        return tuple(self.reference[bit] for bit in self.bits)
+
 
     def set_bit(self, bit: BitResolvable) -> None:
         """
@@ -196,18 +204,32 @@ class FlagsArray:
         flags, #: Iterable[Union["Flags", BitResolvable]], 
         reference=None
     ) -> None:
-        self.reference = reference
 
         # TODO: Make this class mutable with some clever hacks
 
-        # one giant bytearray, where each needs to be the same padded length to avoid index hell
+        # one giant bytearray, where each needs to be the same padded length to avoid index hell            
+        if reference is None and isinstance(flags[0], Flags) and flags[0].reference is not None:
+            self.reference = flags[0].reference
+        else:
+            self.reference = reference
+        
+        self._num_flags = len(flags)
         self._size = max(len(flag.data) for flag in flags)
         self.data = bytearray()
         for flag in flags:
-            self.data.extend(flag.data.ljust(self._size, b'\x00'))
+            if not isinstance(flag, Flags):
+                data = Flags(data).data
+            else:
+                data = flag.data
+            self.data.extend(data.ljust(self._size, b'\x00'))
 
         return None
     
+    def __repr__(self):
+        return f"<{self.__class__.__name__} with {self._num_flags} flags at {hex(id(self))}>"
+    
+    # TODO:
+    # def bits, flags
 
     def is_set(self, bit: BitResolvable) -> bool:
         num, offset = divmod(self._resolve_bit_as_int(bit), 8)
