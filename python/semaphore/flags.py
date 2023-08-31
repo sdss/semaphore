@@ -216,11 +216,11 @@ class FlagsArray:
         self._num_flags = len(flags)
         self._size = max(len(flag.data) for flag in flags)
         self.data = bytearray()
-        for flag in flags:
-            if not isinstance(flag, Flags):
-                data = Flags(data).data
+        for item in flags:
+            if not isinstance(item, Flags):
+                data = Flags(item).data
             else:
-                data = flag.data
+                data = item.data
             self.data.extend(data.ljust(self._size, b'\x00'))
 
         return None
