@@ -168,12 +168,12 @@ class Flags:
         return all(self.is_set(bit) for bit in bits)
 
     
-    def len(self):
+    def __len__(self):
         return len(self.data)
 
 
     def _resolve_bit_as_int(self, bit: BitResolvable):
-        if isinstance(bit, int):
+        if isinstance(bit, (int, np.integer)):
             return bit
         else:
             try:
