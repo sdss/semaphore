@@ -9,7 +9,7 @@ from semaphore.flags import Flags, FlagsArray
 
 class TestFlags(object):
 
-    @mark.parameterize(('N', ), map(list, range(1, 1000)))
+    @mark.parametrize(('N', ), map(list, range(1, 1000)))
     def test_flag_data(self, N):
 
         bits = np.unique(np.random.randint(1, 10000, size=N))
