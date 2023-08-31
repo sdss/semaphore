@@ -9,7 +9,12 @@ semaphore Reference
 Main
 ----
 
-.. automodule:: semaphore.main
+.. automodule:: semaphore.flags
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. automodule:: semaphore.reference
    :members:
    :undoc-members:
    :show-inheritance:

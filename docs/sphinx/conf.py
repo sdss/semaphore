@@ -27,7 +27,7 @@ on_rtd = os.environ.get('READTHEDOCS') == 'True'
 
 # Sphinx template selected in cookiecutter and whether to use releases
 sphinx_template = 'sphinx-bootstrap'
-use_releases = 'yes'
+use_releases = 'no'
 
 if sphinx_template == 'sphinx-bootstrap':
     import sphinx_bootstrap_theme
