@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from typing import Union, Iterable
 
-class FlagReference:
+class FlagsReference:
 
     """A reference class for mapping flag names (and their attributes) to individual bits."""
 
@@ -10,7 +10,8 @@ class FlagReference:
         Initialize a new FlagReference object.
         
         :param definitions:
-            A dictionary of flag definitions, where each key is the flag name, and each value is a dictionary of attributes.
+            An iterable of flag names (where flags have no special attributes), or a dictionary of flag definitions where each 
+            key is the flag name, and each value is a dictionary of attributes.
         """
         if not isinstance(definitions, (dict, OrderedDict)):
             # Construct a dictionary from this list.
@@ -40,6 +41,7 @@ class FlagReference:
             definitions[row[flag_name_key]] = dict(row)
         
         return cls(definitions)
+        
 
 
     def by_attribute(self, key, value, return_bits=True):
@@ -64,19 +66,19 @@ class FlagReference:
 
 
     def __lookup_flag__(self, flag_name):
-        try:
-            return 1 + list(self.definitions.keys()).index(flag_name)
-        except:
-            raise KeyError(f"No matching flag by name '{flag_name}'")
-    
+        # TODO: need to be more explicit and restrictive so we dont allow the user to use integers as flag names
+        if isinstance(flag_name, str):            
+            try:
+                return 1 + list(self.definitions.keys()).index(flag_name)
+            except:
+                raise KeyError(f"No matching flag by name '{flag_name}'")
+        elif isinstance(flag_name, int):
+            return list(self.definitions.keys())[flag_name - 1]
+        else:
+            raise ValueError("Flag name must be a string or integer")
 
     def __getitem__(self, flag_name):
         if isinstance(flag_name, (list, tuple)):
             return tuple(map(self.__lookup_flag__, flag_name))
         else:
             return self.__lookup_flag__(flag_name)
-
-
-from astropy.table import Table
-carton_data = Table.read("cartons.csv")
-Cartons = FlagReference.from_table(carton_data, flag_name_key="carton")
