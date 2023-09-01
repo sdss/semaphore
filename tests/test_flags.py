@@ -16,57 +16,59 @@ class TestFlags(object):
         sorted_bits = np.sort(bits)
         unset_bits = tuple(set(range(1, max_flag)).difference(bits))
 
-        a = Flags(bits)
+        # check type conversions                                
         
-        # Check that both are equal:
+        #assert np.all(np.array(Flags(str(Flags(bits))).bits) == sorted_bits)
+        #assert np.all(np.array(Flags(Flags(bits).data).bits) == sorted_bits)
+        a = Flags()
+        a.set_bits(*bits)
         assert np.all(np.array(a.bits) == sorted_bits)
 
-        b = Flags()
-        for bit in bits:
-            b.set_bit(bit)
+        assert np.all(np.array(Flags.from_bits(a.bits).bits) == sorted_bits)
+        assert np.all(np.array(Flags.from_hex(a.hex).bits) == sorted_bits)
+        assert np.all(np.array(Flags.from_array(a.array).bits == sorted_bits))
 
-            assert b.is_set(bit)            
+        # TODO: not tested from_flags
         
+
+
+
+
+        b = Flags()
+        b.set_bits(*bits)
+
         assert np.all(np.array(b.bits) == sorted_bits)
 
 
-        c = Flags()
-        c.set_bits(*bits)
-        assert np.all(np.array(c.bits) == sorted_bits)
 
 
         d = Flags()
-        for bit in bits:
-            d.set_bit(bit)
-            assert d.is_set(bit)
-
-            d.clear_bit(bit)
-            assert not d.is_set(bit)
-
-            d.toggle_bit(bit)
-            assert d.is_set(bit)
-            d.toggle_bit(bit)
-            assert not d.is_set(bit)
+        d.toggle_bits(*bits)
+        assert np.all(np.array(d.bits) == sorted_bits)
+        d.toggle_bits(*bits)
+        assert len(d.bits) == 0
 
         
         e = Flags()
         e.toggle_bits(*bits)
         assert np.all(np.array(e.bits) == sorted_bits)
         e.toggle_bits(*bits)
-        assert not e.are_any_set(*range(1, max_flag))
+        assert not e.are_any_bits_set(*range(1, max_flag))
         assert len(e.bits) == 0
 
-        f = Flags(bits)
-        assert f.are_all_set(*bits)
-        assert not f.are_any_set(*unset_bits)
+        f = Flags()
+        f.set_bits(*bits)
+        assert f.are_all_bits_set(*bits)
+        assert not f.are_any_bits_set(*unset_bits)
 
-        g = Flags(bits)
+        g = Flags()
         g.set_bits(*bits)
-        assert g.are_all_set(*bits)
+        assert g.are_all_bits_set(*bits)
         g.clear_bits(*bits)
-        assert not g.are_any_set(*bits)
+        assert not g.are_any_bits_set(*bits)
 
 
-        # check type conversions                                
-        assert np.all(np.array(Flags(str(Flags(bits))).bits) == sorted_bits)
-        assert np.all(np.array(Flags(Flags(bits).data).bits) == sorted_bits)
+
+
+        g.__repr__()
+    
