@@ -222,6 +222,31 @@ class FlagsArray:
         return self
     
 
+    def to_fits_column(self, name, shrink=True, **kwargs):
+        """
+        Return a FITS column object for this array.
+        
+        :param name:
+            The name of the column.
+        
+        :param shrink: [optional]
+            If `True`, shrink the array to the minimum required size before writing.
+        """
+        from astropy.io import fits
+
+        if shrink:
+            self.shrink()
+        
+        N, F = self.data.shape
+        return fits.Column(
+            name=name,
+            array=self.data,
+            format=f"{F}B",
+            dim=f"({F})",
+            **kwargs
+        )
+
+
     def _stack_is_bit_set(self, *bits: Iterable[int]) -> np.array:
         # TODO: this could be vectorized
         return np.vstack([self.is_bit_set(bit) for bit in bits])
