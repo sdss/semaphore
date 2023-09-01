@@ -48,14 +48,44 @@ class FlagsArray:
         return None
         
 
-    def get_bit_index(self, flag: str) -> int:
+    def get_bits(self, index):
         """
-        Get the bit index for the given flag.
+        Return a tuple of bits that are set for the given index.
+        
+        :param index:
+            The index to get the bits for.
+        """
+        bit, bits, size = (0, [], self.data.shape[1])
+        while True:
+            num, offset = divmod(bit, 8)
+            if num >= size:
+                break
+            if bool(self.data[index, num] & (1 << offset)):
+                bits.append(bit)
+            bit += 1
+        return tuple(bits)
+
+    
+    def get_flags(self, index):
+        """
+        Return a tuple of all flag names that are set for the given index.
+        
+        :param index:
+            The index to get the flag names for.
+        """
+        if self.reference is None:
+            raise ValueError("Cannot return flag names without a flag reference")
+        return tuple(self.reference[bit] for bit in self.get_bits(index))
+    
+
+    def get_bit_position(self, flag: str) -> int:
+        """
+        Get the bit position for the given flag.
         
         This does not return whether the flag is set or not. It only returns the position.
 
         :param flag:
-            The flag to get the bit index for.
+            The flag to get the bit position for.
         
         :raises ValueError:
             If no reference exists.
@@ -64,7 +94,7 @@ class FlagsArray:
             If the flag is not found in the reference.
 
         :returns:
-            The bit index for the given flag.
+            The bit position for the given flag.
         """
         try:
             bit = self.reference[flag]
@@ -76,7 +106,13 @@ class FlagsArray:
         return bit
 
 
-    def is_bit_set(self, bit: int):
+    def is_bit_set(self, bit: int) -> np.array:
+        """
+        Return a boolean array indicating whether the given bit is set for each item.
+
+        :param bit:
+            The bit to check.
+        """
         num, offset = self._get_num_and_offset(bit)
         N, F = self.data.shape
         if F > num:
@@ -85,38 +121,105 @@ class FlagsArray:
             return np.zeros(N, dtype=bool)
 
 
-    def is_flag_set(self, flag: str):
-        return self.is_bit_set(self.get_bit_index(flag))
+    def is_flag_set(self, flag: str) -> np.array:
+        """
+        Return a boolean array indicating whether the given flag is set for each item.
+
+        :param flag:
+            The flag to check.
+        """
+        return self.is_bit_set(self.get_bit_position(flag))
 
 
     def set_bit(self, index, bit):
+        """
+        Set the given bit for the given index.
+        
+        :param index:
+            The index to set the bit for.
+        
+        :param bit:
+            The bit to set.
+        """
         num, offset = self._ensure_shape_for_bit(bit)
         self.data[index, num] |= (1 << offset)
         return self
 
 
     def set_flag(self, index, flag):
-        return self.set_bit(index, self.get_bit_index(flag))
+        """
+        Set the given flag for the given index.
+        
+        :param index:
+            The index to set the flag for.
+
+        :param flag:
+            The flag to set.
+        """
+        return self.set_bit(index, self.get_bit_position(flag))
 
 
     def clear_bit(self, index, bit):
+        """
+        Clear the given bit for the given index.
+        
+        :param index:
+            The index to clear the bit for.
+            
+        :param bit:
+            The bit to clear.
+        """
         num, offset = self._ensure_shape_for_bit(bit)
         self.data[index, num] &= ~(1 << offset)
         return self
     
 
     def clear_flag(self, index, flag):
-        return self.clear_bit(index, self.get_bit_index(flag))
+        """
+        Clear the given flag for the given index.
+        
+        :param index:
+            The index to clear the flag for.
+            
+        :param flag:
+            The flag to clear.
+        """
+        return self.clear_bit(index, self.get_bit_position(flag))
     
 
     def toggle_bit(self, index, bit):
+        """
+        Toggle the given bit for the given index.
+        
+        :param index:
+            The index to toggle the bit for.
+        
+        :param bit:
+            The bit to toggle.
+        """
         num, offset = self._ensure_shape_for_bit(bit)
         self.data[index, num] ^= (1 << offset)
         return self
     
 
     def toggle_flag(self, index, flag):
-        return self.toggle_bit(index, self.get_bit_index(flag))
+        """
+        Toggle the given flag for the given index.
+        
+        :param index:
+            The index to toggle the flag for.
+        
+        :param flag:
+            The flag to toggle.
+        """
+        return self.toggle_bit(index, self.get_bit_position(flag))
+    
+
+    def shrink(self):
+        """Shrink the data array to the maximum required shape based on the highest bit set."""
+        index = 1 + np.where(np.any(self.data > 0, axis=0))[0][-1]
+        self.data = self.data[:, :index]
+        return self
     
 
     def _stack_is_bit_set(self, *bits: Iterable[int]) -> np.array:
@@ -130,10 +233,10 @@ class FlagsArray:
         return self._stack_is_bit_set(*bits).all(axis=0)
 
     def are_any_flags_set(self, *flags: Iterable[str]) -> np.array:
-        return self._stack_is_bit_set(*map(self.get_bit_index, flags)).any(axis=0)
+        return self._stack_is_bit_set(*map(self.get_bit_position, flags)).any(axis=0)
 
     def are_all_flags_set(self, *flags: Iterable[str]) -> np.array:
-        return self._stack_is_bit_set(*map(self.get_bit_index, flags)).all(axis=0)
+        return self._stack_is_bit_set(*map(self.get_bit_position, flags)).all(axis=0)
 
     def _get_num_and_offset(self, bit):
         return divmod(bit, 8)
@@ -150,8 +253,7 @@ class FlagsArray:
             ])
         return (num, offset)
 
-    # TODO: shrink() function to make array smaller (as small as biggest bit set)
-    # 
+
 
     def __repr__(self):
         return f"<{self.__class__.__name__} with shape {self.data.shape} at {hex(id(self))}>"

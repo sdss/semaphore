@@ -75,14 +75,14 @@ class Flags:
 
 
     @classmethod
-    def from_flags(cls, flags: Iterable[str], reference: Optional[FlagsReference] = None):
+    def from_flags(cls, flags: Iterable[str], reference: FlagsReference):
         """
         Initialize a new Flags object from a list of flag names.
         
         :param flags:
             An iterable of flag names to set.
         
-        :param reference: [optional]
+        :param reference:
             A reference to use when resolving flag names to bit positions.
         """
         return cls(reference=reference).set_flags(*flags)
@@ -122,14 +122,14 @@ class Flags:
         return tuple(self.reference[bit] for bit in self.bits)
 
 
-    def get_bit_index(self, flag: str) -> int:
+    def get_bit_position(self, flag: str) -> int:
         """
-        Get the bit index for the given flag.
+        Get the bit position for the given flag.
         
         This does not return whether the flag is set or not. It only returns the position.
 
         :param flag:
-            The flag to get the bit index for.
+            The flag to get the bit position for.
         
         :raises ValueError:
             If no reference exists.
@@ -138,7 +138,7 @@ class Flags:
             If the flag is not found in the reference.
 
         :returns:
-            The bit index for the given flag.
+            The bit position for the given flag.
         """
         try:
             bit = self.reference[flag]
@@ -170,7 +170,7 @@ class Flags:
         :param *flags:
             An iterable of flag names to set.
         """
-        return self.set_bits(*map(self.get_bit_index, flags))
+        return self.set_bits(*map(self.get_bit_position, flags))
 
 
     def clear_bits(self, *bits: Iterable[int]) -> None:
@@ -193,7 +193,7 @@ class Flags:
         :param *flags:
             An iterable of flag names to clear.
         """
-        return self.clear_bits(*map(self.get_bit_index, flags))
+        return self.clear_bits(*map(self.get_bit_position, flags))
 
 
     def toggle_bits(self, *bits: Iterable[int]) -> None:
@@ -218,7 +218,7 @@ class Flags:
             An iterable of flag names to toggle. If the same flag appears many times in `flags`,
             it will only be toggled once.
         """
-        return self.toggle_bits(*map(self.get_bit_index, flags))
+        return self.toggle_bits(*map(self.get_bit_position, flags))
     
 
     def is_bit_set(self, bit: int) -> bool:
@@ -240,7 +240,7 @@ class Flags:
         :param flag:
             The flag to check.
         """
-        return self.is_bit_set(self.get_bit_index(flag))
+        return self.is_bit_set(self.get_bit_position(flag))
     
 
     def are_any_bits_set(self, *bits: Iterable[int]) -> bool:
