@@ -1,11 +1,11 @@
 import numpy as np
-from typing import Union, Optional, Tuple, Iterable
+from typing import Optional, Tuple, Iterable
 
 from semaphore.reference import FlagsReference
 
 class Flags:
 
-    """An extensible set of mutable flags."""
+    """An extensible representation of mutable flags."""
 
     def __init__(
         self, 
@@ -16,15 +16,14 @@ class Flags:
         Initialize a new Flags object.
         
         :param data:
-            The initial data to set the flags to. Must be a bytearray, because allowing
-            strings or integers can be misinterpreted (e.g., integers as bits or integers representing
-            an existing bitfield). 
+            The initial data to set the flags to. Must be a bytearray, because allowing strings or integers 
+            can be misinterpreted (e.g., integers as bits or integers representing an existing bitfield). 
             
-            You can initialize a new Flags object using one of the ``from_hex``, ``from_array``, or 
-            ``from_bits`` constructors.
+            You can initialize a new Flags object using one of the ``from_hex``, ``from_array``, ``from_bits``,
+            or ``from_flags`` constructors.
             
         :param reference: [optional]
-            A reference to use when interpreting bits as strings.
+            A reference to use when resolving flag names to bit positions.
         """
         if data is not None and not isinstance(data, bytearray):
             raise TypeError(
@@ -42,7 +41,7 @@ class Flags:
         Initialize a new Flags object from a hexadecimal string.
 
         :param reference: [optional]
-            A reference to use when interpreting bits as strings.
+            A reference to use when resolving flag names to bit positions.
         """
         return cls(bytearray.fromhex(hex), reference=reference)
 
@@ -56,7 +55,7 @@ class Flags:
             An array of 8-bit integers to construct the flags from.
 
         :param reference: [optional]
-            A reference to use when interpreting bits as strings.
+            A reference to use when resolving flag names to bit positions.
         """
         return cls(bytearray(array), reference=reference)
 
@@ -70,7 +69,7 @@ class Flags:
             An iterable of bits to set.
         
         :param reference: [optional]
-            A reference to use when interpreting bits as strings.
+            A reference to use when resolving flag names to bit positions.
         """
         return cls(reference=reference).set_bits(*bits)
 
@@ -84,7 +83,7 @@ class Flags:
             An iterable of flag names to set.
         
         :param reference: [optional]
-            A reference to use when interpreting bits as strings.
+            A reference to use when resolving flag names to bit positions.
         """
         return cls(reference=reference).set_flags(*flags)
 
@@ -229,6 +228,7 @@ class Flags:
         :param bit:
             The bit to check.
         """
+        # TODO: don't ensure length for bit,.. it expands the bytearray even if we don;t have the bit!
         num, offset = self._ensure_length_for_bit(bit)
         return bool(self.data[num] & (1 << offset))
     
@@ -301,92 +301,3 @@ class Flags:
 
     def __str__(self):
         return self.hex()
-
-
-BitResolvable = None
-
-class FlagsArray:
-
-    """An extensible array of mutable flags."""
-
-    def __init__(
-        self, 
-        flags: Iterable[Union[Flags, BitResolvable]], 
-        reference: Optional[FlagsReference] = None
-    ) -> None:
-        """
-        Initialize a new FlagsArray object.
-        
-        :param flags:
-            An iterable of flags to initialize the array with.
-            
-        :param reference: [optional]
-            A reference to use when interpreting bits as strings.
-        """
-
-        # TODO: Should we make this class mutable with some clever hacks?
-
-        if reference is None and isinstance(flags[0], Flags) and flags[0].reference is not None:
-            self.reference = flags[0].reference
-        else:
-            self.reference = reference
-        
-        # one giant bytearray, where each needs to be the same padded length to avoid index hell            
-        self._size = 0
-        self._num_flags = len(flags)        
-        array_data = []
-        for item in flags:
-            if not isinstance(item, Flags):
-                data = Flags(item).data
-            else:
-                data = item.data
-            
-            self._size = max(self._size, len(data))
-            array_data.append(data)
-        
-        self.data = bytearray()
-        for data in array_data:
-            self.data.extend(data.ljust(self._size, b'\x00'))
-        return None
-        
-
-    # TODO:
-    # def bits, flags
-
-
-    def is_set(self, bit: BitResolvable) -> bool:
-        num, offset = divmod(self._resolve_bit_as_int(bit), 8)
-        return (np.array(self.data[num::self._size]) & (1 << offset)).astype(bool)
-
-    def are_any_set(self, *bits: Iterable[BitResolvable]) -> np.array:
-        return self._op_is_set(np.any, *bits)
-
-
-    def are_all_set(self, *bits: Iterable[BitResolvable]) -> np.array:
-        return self._op_is_set(np.all, *bits)
-
-
-    def sum_set(self, *bits: Iterable[BitResolvable]) -> np.array:
-        return self._op_is_set(np.sum, *bits)
-
-
-    def _op_is_set(self, op, *bits: Iterable[BitResolvable]) -> np.array:
-        return op(np.vstack([self.is_set(bit) for bit in bits]), axis=0)
-
-
-    def _resolve_bit_as_int(self, bit: BitResolvable):
-        if isinstance(bit, int):
-            return bit
-        else:
-            try:
-                return self.reference[bit]
-            except:
-                if self.reference is None:
-                    raise ValueError("Cannot interpret bit as string without flag reference")  
-                else:
-                    raise ValueError(f"Cannot interpret bit '{bit}' from reference")
-
-
-    def __repr__(self):
-        return f"<{self.__class__.__name__} with {self._num_flags} items at {hex(id(self))}>"
-

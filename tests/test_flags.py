@@ -4,7 +4,7 @@
 import numpy as np
 from pytest import mark
 
-from semaphore.flags import Flags, FlagsArray
+from semaphore.flags import Flags
 
 
 class TestFlags(object):
