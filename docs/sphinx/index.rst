@@ -20,7 +20,9 @@ The current version is |semaphore_version|. You can install the package by doing
 
 .. code-block:: console
 
-  $ pip install sdss-semaphore
+  $ git clone git@github.com:sdss/semaphore.git
+  $ cd semaphore
+  $ python setup.py install 
 
 
 Interpreting flags
