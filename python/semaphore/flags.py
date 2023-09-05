@@ -285,7 +285,10 @@ class Flags:
 
     def __len__(self):
         return len(self.data)
-
+    
+    @property
+    def shape(self):
+        return self.data.shape
 
     def _ensure_length_for_bit(self, bit: int) -> Tuple[int, int]:
         num, offset = divmod(bit, 8)
