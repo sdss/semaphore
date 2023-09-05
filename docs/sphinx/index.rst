@@ -5,6 +5,7 @@ SDSS has a long history of using flags to indicate the quality of data.
 These flags have usually been stored as 64-bit integers.
 When more than 64 flag definitions have been needed, multiple flag columns have been used.
 For example, `APOGEE_TARGET1` and `APOGEE_TARGET2` are two 64-bit flag columns used by APOGEE to indicate targeting information.
+In APOGEE-2, another three columns were added: `APOGEE2_TARGET1`, `APOGEE2_TARGET2`, and `APOGEE2_TARGET3`.
 
 This is manageable if there are only a few columns, but becomes unweildly when there are many.
 If the targeting information in SDSS-V were stored in this way, it would require dozens of flag columns.
