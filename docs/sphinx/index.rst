@@ -137,7 +137,7 @@ So here we will create a `Flags` object for each source (unique by catalog ident
   ])
   hdu_list.writeto("allStar-ipl3.fits")
 
-Now you can distribute the targeting.fits file with your data product, and users can use the `semaphore` package to interpret the flags.
+Now you have all the targeting information stored with your data product, and users can use the `semaphore` package to interpret the flags.
 Just make sure users know where to find the flag reference file. In the example above we should really either store the flag references
 in another HDU in the same FITS file, or store the location of the flag reference in the comments of the FITS file.
 
