@@ -41,7 +41,7 @@ Let's run through an example:
   import semaphore
 
   # Load the flag reference
-  reference = semaphore.FlagReference.from_table(Table.read("target_flags_ipl3.csv"), flag_name_key="carton")
+  reference = semaphore.FlagReference.from_table("target_flags_ipl3.csv", flag_name_key="carton")
 
   # Load a SDSS data product that uses semaphore flags
   all_star = fits.open("allStar-ipl3.fits")[1].data
