@@ -59,6 +59,10 @@ Let's run through an example:
   # Or require both (NO sources should exist here, if we have done our targeting correctly...)
   in_gg_and_wd = target_flags.are_all_flags_set("mwm_gg_core", "mwm_wd_core")
 
+  # Or query by an attribute of the flag, which is stored in the definitions file (e.g., the 'program'):
+  # For example, the 'mwm_validation' program includes many cartons.
+  flag_names = reference.get_flags_by_attribute("program", "mwm_validation")
+  is_mwm_validation_program = target_flags.are_any_flags_set(*flag_names)
 
 
 Creating flags
