@@ -41,7 +41,7 @@ Let's run through an example:
   import semaphore
 
   # Load the flag reference
-  reference = semaphore.FlagReference.from_csv("target_flags_ipl3.csv")
+  reference = semaphore.FlagReference.from_table(Table.read("target_flags_ipl3.csv"), flag_name_key="carton")
 
   # Load a SDSS data product that uses semaphore flags
   all_star = fits.open("allStar-ipl3.fits")[1].data
@@ -73,7 +73,6 @@ Here's an example where we will create a flag reference for a set of cartons fro
 
   from astropy.io import fits
   from astropy.table import Table
-  from tqdm import tqdm
   from sdssdb.peewee.sdss5db.targetdb import database, Target, Carton, CartonToTarget
   from semaphore import Flags, FlagsArray, FlagsReference 
 
@@ -95,7 +94,6 @@ So here we will create a `Flags` object for each source (unique by catalog ident
 
 .. code-block:: python
 
-
   # We will only store 1 million assignments for this example.
   limit = 1_000_000 
 
@@ -113,18 +111,18 @@ So here we will create a `Flags` object for each source (unique by catalog ident
   )
 
   assignments = {}
-  for catalogid, flag in tqdm(q):
+  for catalogid, flag in q:
       assignments.setdefault(catalogid, Flags(reference=reference))
       assignments[catalogid].set_flags(flag)
 
   # Now we have a dictionary of Flags objects, we can merge them into a FlagsArray.
   catalog_identifiers = list(assignments.keys())
 
-  flags_array = FlagsArray(catalog_identifiers.values())
+  flags_array = FlagsArray(assignments.values())
   
   table = fits.BinTableHDU.from_columns(
     [
-      fits.Column(name="CATALOGID", array=catalog_identifiers),
+      fits.Column(name="CATALOGID", array=catalog_identifiers, format="K"),
       flags_array.to_fits_column(name="TARGETING")
     ]
   )

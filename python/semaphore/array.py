@@ -32,7 +32,7 @@ class FlagsArray:
 
         # If no reference is given, use the first one we can find.
         self.reference = reference
-        if self.reference is None:
+        if self.reference is None and not isinstance(item, np.ndarray):
             for item in data:
                 if item.reference is not None:
                     self.reference = item.reference
