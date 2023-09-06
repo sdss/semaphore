@@ -39,7 +39,7 @@ class FlagsArray:
                     break
 
         if isinstance(data, np.ndarray):
-            self.data = np.atleast_2d(data.copy(), dtype=np.uint8)
+            self.data = np.atleast_2d(data.copy()).astype(np.uint8)
         else:
             N, F = (len(data), max(len(item) for item in data))
             self.data = np.zeros((N, F), dtype=np.uint8)
