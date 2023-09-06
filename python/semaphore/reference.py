@@ -1,4 +1,4 @@
-import numpy as np
+from astropy.table import Table
 from collections import OrderedDict
 from typing import Union, Iterable
 
@@ -23,7 +23,7 @@ class FlagsReference:
 
 
     @classmethod
-    def from_table(cls, table, flag_name_key):
+    def from_table(cls, table, flag_name_key, **kwargs):
         """
         Construct a new FlagReference object from an astropy Table.
         
@@ -33,6 +33,9 @@ class FlagsReference:
         :param flag_name_key:
             The column name in `table` that references the name of the flag.
         """
+
+        if isinstance(table, str):
+            table = Table.read(table, **kwargs)
 
         if flag_name_key not in table.colnames:
             raise ValueError(f"Column {flag_name_key} not found in table")
@@ -44,7 +47,13 @@ class FlagsReference:
         return cls(definitions)
     
 
-    def by_attribute(self, key, value, return_bits=True):
+    def get_bits_by_attribute(self, key, value):
+        return self._by_attribute(key, value, return_bits=True)
+    
+    def get_flags_by_attribute(self, key, value):
+        return self._by_attribute(key, value, return_bits=False)
+
+    def _by_attribute(self, key, value, return_bits=True):
         """
         Return a tuple of flags or bits that match a given attribute.
         
