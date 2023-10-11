@@ -1,5 +1,7 @@
 import numpy as np
 from typing import Tuple
+from functools import cached_property
+from typing import Optional
 from sdss_semaphore import BaseFlags
 
 
@@ -103,6 +105,27 @@ class BaseTargetingFlags(BaseFlags):
             skip_empty=skip_empty
         )
 
+    def set_bit_by_carton_pk(self, index: int, carton_pk: int):
+        """
+        Set the bit for the carton with the given primary key.
+
+        :param index:
+            The index of the item to set.
+
+        :param carton_pk:
+            The carton primary key.        
+        """
+        bit = self.get_bit_position_from_carton_pk[carton_pk]
+        return self.set_bit(index, bit)
+
+    @cached_property
+    def get_bit_position_from_carton_pk(self):
+        """
+        Return a dictionary with carton primary keys as keys, and bit positions as values.
+        
+        This is a helper method for efficiency creating large `TargetingFlags` objects.
+        """
+        return { attrs["carton_pk"]: bit for bit, attrs in self.mapping.items() }
 
 class TargetingFlags(BaseTargetingFlags):
 

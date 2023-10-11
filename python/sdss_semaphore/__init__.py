@@ -2,15 +2,18 @@ __version__ = "0.2.2"
 
 import numpy as np
 import warnings
-from typing import Union, Tuple, Iterable, List, Tuple
+from typing import Union, Tuple, Iterable, List, Optional, Tuple
 
 
 class BaseFlags:
 
     """A base class for communicating with flags."""
 
-    def __init__(self, array: Union[np.ndarray, Iterable[Iterable[int]], Iterable[bytearray]]) -> None:
-        if isinstance(array, (list, tuple)) and isinstance(array[0], bytearray):
+    def __init__(self, array: Optional[Union[np.ndarray, Iterable[Iterable[int]], Iterable[bytearray]]] = None) -> None:
+        if array is None:
+            # Assume single object flag.
+            self.array = np.zeros((1, 0), dtype=self.dtype)
+        elif isinstance(array, (list, tuple)) and isinstance(array[0], bytearray):
             # TODO: If the self.dtype is not uint8, then we might need to compute these initial offsets ourselves,
             #       because I think bytearray is natively uint8
             if self.dtype != np.uint8:
