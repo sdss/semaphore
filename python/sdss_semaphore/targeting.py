@@ -1,8 +1,7 @@
 import numpy as np
 from typing import Tuple
-from functools import cached_property
 
-from sdss_semaphore import BaseFlags
+from sdss_semaphore import BaseFlags, cached_class_property
 
 class BaseTargetingFlags(BaseFlags):
 
@@ -124,7 +123,7 @@ class BaseTargetingFlags(BaseFlags):
         bit = self.bit_position_from_carton_pk[carton_pk]
         return self.set_bit(index, bit)
 
-    @cached_property
+    @cached_class_property
     def bit_position_from_carton_pk(self):
         """
         Return a dictionary with carton primary keys as keys, and bit positions as values.
