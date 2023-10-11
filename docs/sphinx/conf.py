@@ -16,7 +16,7 @@ import os
 from pkg_resources import parse_version
 
 try:
-    from semaphore import __version__
+    from sdss_semaphore import __version__
 except ModuleNotFoundError:
     from sdsstools import get_package_version
     __version__ = get_package_version(__file__, 'sdss-semaphore') or 'dev'
