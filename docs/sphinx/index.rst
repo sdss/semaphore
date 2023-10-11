@@ -21,125 +21,13 @@ The current version is |semaphore_version|. You can install the package by doing
 
 .. code-block:: console
 
-  $ git clone git@github.com:sdss/semaphore.git
-  $ cd semaphore
-  $ python setup.py install 
+  $ pip install sdss-semaphore
 
 
-Interpreting flags
-------------------
+Notebooks
+---------
 
-If you've downloaded a SDSS data product that uses `semaphore` flags, you can use the `semaphore` package to interpret the flags.
-The only thing you'll need is the 'flag reference': a set of flag definitions that map the bit location of a flag to its name, description, and potentially any other attributes.
-The flag reference can be stored as a table (e.g., a CSV file), and the location of the flag reference should be stored in the comments where the original flags are stored.
-
-Let's run through an example:
-
-.. code-block:: python
-
-  from astropy.io import fits
-  import semaphore
-
-  # Load the flag reference
-  reference = semaphore.FlagReference.from_table("target_flags_ipl3.csv", flag_name_key="carton")
-
-  # Load a SDSS data product that uses semaphore flags
-  all_star = fits.open("allStar-ipl3.fits")[1].data
-
-  # The targeting flags are stored in the 'TARGETING' column
-  target_flags = semaphore.FlagsArray(all_star["TARGETING"], reference=reference)
-
-  # Query the flags.
-  # This will give us a boolean mask indicating whether a source is in `mwm_gg_core` (True) or not (False)
-  in_gg_core = target_flags.is_flag_set("mwm_gg_core")
-
-  # We can also query multiple flags at once
-  in_gg_or_wd = target_flags.are_any_flags_set("mwm_gg_core", "mwm_wd_core")
-
-  # Or require both (NO sources should exist here, if we have done our targeting correctly...)
-  in_gg_and_wd = target_flags.are_all_flags_set("mwm_gg_core", "mwm_wd_core")
-
-  # Or query by an attribute of the flag, which is stored in the definitions file (e.g., the 'program'):
-  # For example, the 'mwm_validation' program includes many cartons.
-  flag_names = reference.get_flags_by_attribute("program", "mwm_validation")
-  is_mwm_validation_program = target_flags.are_any_flags_set(*flag_names)
-
-
-Creating flags
---------------
-
-If you are creating a SDSS data product that uses `semaphore` flags, you'll first need to create a flag reference.
-It's recommended to use a flag reference that does not have any gaps in the bit locations, as this makes storing the flags more compact.
-
-Here's an example where we will create a flag reference for a set of cartons from the SDSS targeting database. 
-
-.. code-block:: python
-
-  from astropy.io import fits
-  from astropy.table import Table
-  from sdssdb.peewee.sdss5db.targetdb import database, Target, Carton, CartonToTarget
-  from semaphore import Flags, FlagsArray, FlagsReference 
-
-  database.set_profile("operations")
-
-  q = Carton.select().dicts()
-  definitions = Table(rows=list(q))
-  definitions.write("target_flags_ipl3.csv", overwrite=True)
-
-  # Create a reference from the carton definitions, using `carton` name as the "unique" flag name.
-  # If you wanted a different flag name, you could create a new column in your table and use that.
-  reference = FlagsReference.from_table(definitions, flag_name_key="carton")
-
-
-Now let's query the database for a million target assignments and store their flags.
-
-Since we are querying a million "target assignments" (and not a million targets), we may not know how many targets we will get back.
-So here we will create a `Flags` object for each source (unique by catalog identifier) and merge them together into a `FlagsArray` before storing them.
-
-.. code-block:: python
-
-  # We will only store 1 million assignments for this example.
-  limit = 1_000_000 
-
-  q = (
-      Target
-      .select(
-          Target.catalogid,
-          Carton.carton # This will be the flag name to set
-      )
-      .join(CartonToTarget)
-      .join(Carton)
-      .limit(limit)
-      .tuples()
-      .iterator()
-  )
-
-  assignments = {}
-  for catalogid, flag in q:
-      assignments.setdefault(catalogid, Flags(reference=reference))
-      assignments[catalogid].set_flags(flag)
-
-  # Now we have a dictionary of Flags objects, we can merge them into a FlagsArray.
-  catalog_identifiers = list(assignments.keys())
-
-  flags_array = FlagsArray(assignments.values())
-  
-  table = fits.BinTableHDU.from_columns(
-    [
-      fits.Column(name="CATALOGID", array=catalog_identifiers, format="K"),
-      flags_array.to_fits_column(name="TARGETING")
-    ]
-  )
-  
-  hdu_list = fits.HDUList([
-    fits.PrimaryHDU(),
-    table
-  ])
-  hdu_list.writeto("allStar-ipl3.fits")
-
-Now you have all the targeting information stored with your data product, and users can use the `semaphore` package to interpret the flags.
-Just make sure users know where to find the flag reference file. In the example above we should really either store the flag references
-in another HDU in the same FITS file, or store the location of the flag reference in the comments of the FITS file.
+[Targeting flags](https://github.com/sdss/semaphore/blob/main/notebooks/20231011_sdss5_targeting.ipynb)
 
 
 Reference
