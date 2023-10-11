@@ -18,14 +18,13 @@ class BaseTargetingFlags(BaseFlags):
         """Return a list of all programs."""
         return self._all_attributes("program")
     
-    
     @property
-    def all_names(self) -> Tuple[str]:
+    def all_carton_names(self) -> Tuple[str]:
         """Return a list of all carton names."""
         return self._all_attributes("name")
     
     @property
-    def all_alt_names(self) -> Tuple[str]:
+    def all_alt_carton_names(self) -> Tuple[str]:
         """Return a list of all alternative carton names."""
         return self._all_attributes("alt_name")
 

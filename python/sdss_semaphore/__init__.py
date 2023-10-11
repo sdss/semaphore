@@ -78,8 +78,8 @@ class BaseFlags:
         raise NotImplementedError(f"`n_bits` must be defined in subclass")
 
     @cached_class_property
-    def mapping(self):
-        """Load the mapping definition once per class."""
+    def mapping(self) -> dict:
+        """A dictionary containing bit positions as keys, and dictionaries of flag attributes as values."""
         
         # TODO: The format and content of the mapping file is TBD. Here we will just load the CSV we have.
         #       Once we have finalized the format and content, move this import out and add dependency (fits/astropy).
