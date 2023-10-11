@@ -2,7 +2,7 @@ __version__ = "0.2.3"
 
 import numpy as np
 import warnings
-from typing import Union, Tuple, Iterable, List, Optional, Tuple
+from typing import Dict, Union, Tuple, Iterable, List, Optional, Tuple
 
 
 class BaseFlags:
@@ -50,6 +50,29 @@ class BaseFlags:
     def mapping(self):
         raise NotImplementedError(f"`mapping` must be defined in subclass")
 
+    @property
+    def bits_set(self) -> Iterable[Tuple[int]]:
+        """
+        A generator that yields a tuple of bits set for each item.
+        
+        If you want a more efficient lookup, you can use:
+
+            items, bits = np.where(flags.as_boolean_array())
+            
+        """
+        for row in self.as_boolean_array():
+            yield tuple(np.where(row)[0])
+
+    @property
+    def flags_set(self) -> Iterable[Tuple[Dict]]:
+        """
+        A generator that yields all set flags.
+        
+        This can be a hugely expensive query if you have large number of items (e.g., stars).
+        """
+        for row in self.as_boolean_array():
+            yield tuple(self.mapping[bit] for bit in np.where(row)[0])
+        
     def _all_attributes(self, key):
         return tuple(set(attrs[key] for attrs in self.mapping.values()))
 
