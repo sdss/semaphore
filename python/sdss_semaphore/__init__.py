@@ -35,6 +35,9 @@ class BaseFlags:
     def mapping(self):
         raise NotImplementedError(f"`mapping` must be defined in subclass")
 
+    def _all_attributes(self, key):
+        return tuple(set(attrs[key] for attrs in self.mapping.values()))
+
     def count(self, skip_empty: bool = False) -> dict:
         """
         Return a dictionary containing the number of items assigned with each flag.
