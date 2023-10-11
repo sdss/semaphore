@@ -3,6 +3,37 @@ __version__ = "0.2.3"
 import numpy as np
 import warnings
 from typing import Dict, Union, Tuple, Iterable, List, Optional, Tuple
+from pkg_resources import resource_filename
+
+
+
+class cached_class_property:
+    """
+    Descriptor decorator implementing a class-level, read-only
+    property, which caches its results on the class(es) on which it
+    operates.
+
+    From the Dicken's library
+    """
+    class AliasConflict(ValueError):
+        pass
+
+    def __init__(self, func):
+        self.__func__ = func
+        self.__cache_name__ = '_{}_'.format(func.__name__.strip('_'))
+        if self.__cache_name__ == func.__name__:
+            raise self.AliasConflict(self.__cache_name__)
+
+    def __get__(self, instance, cls=None):
+        if cls is None:
+            cls = type(instance)
+
+        try:
+            return vars(cls)[self.__cache_name__]
+        except KeyError:
+            result = self.__func__(cls)
+            setattr(cls, self.__cache_name__, result)
+            return result
 
 
 class BaseFlags:
@@ -46,10 +77,21 @@ class BaseFlags:
     def n_bits(self):
         raise NotImplementedError(f"`n_bits` must be defined in subclass")
 
-    @property
+    @cached_class_property
     def mapping(self):
-        raise NotImplementedError(f"`mapping` must be defined in subclass")
-
+        """Load the mapping definition once per class."""
+        
+        # TODO: The format and content of the mapping file is TBD. Here we will just load the CSV we have.
+        #       Once we have finalized the format and content, move this import out and add dependency (fits/astropy).
+        path = resource_filename(__name__, f'etc/{self.MAPPING_BASENAME}')
+        from astropy.table import Table
+        
+        mapping = {}
+        for row in Table.read(path):
+            row_dict = dict(zip(row.colnames, row))
+            mapping[row_dict["bit"]] = row_dict
+        return mapping
+            
     @property
     def bits_set(self) -> Iterable[Tuple[int]]:
         """
@@ -301,3 +343,6 @@ class BaseFlags:
     def __len__(self):
         N, B = self.array.shape
         return N
+    
+    
+    
