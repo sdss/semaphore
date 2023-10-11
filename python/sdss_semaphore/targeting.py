@@ -2,10 +2,9 @@ import numpy as np
 from typing import Tuple
 from sdss_semaphore import BaseFlags
 
+class TargetingFlags(BaseFlags):
 
-class BaseTargetingFlags(BaseFlags):
-
-    """A base class for communicating SDSS-V targeting information with flags."""
+    """Communicating SDSS-V targeting information with flags."""
 
     @property
     def all_mappers(self) -> Tuple[str]:
@@ -103,10 +102,6 @@ class BaseTargetingFlags(BaseFlags):
             skip_empty=skip_empty
         )
 
-
-class TargetingFlags(BaseTargetingFlags):
-
-    """Communicating with SDSS-V targeting flags."""
 
     dtype, n_bits = (np.uint8, 8)
     meta = { "SDSSC2BV": 1.0 }

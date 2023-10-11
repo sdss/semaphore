@@ -1,4 +1,4 @@
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 import numpy as np
 import warnings
@@ -89,7 +89,7 @@ class BaseFlags:
                 counts[attribute] = count            
         return counts
         
-    def as_boolean_array(self):
+    def as_boolean_array(self) -> np.ndarray:
         """
         Return a (N, F) shaped big-endian boolean array indicating whether each bit is set for 
         each item, where the input data array has shape (N, B) and `F = B * n_bits` is the maximum

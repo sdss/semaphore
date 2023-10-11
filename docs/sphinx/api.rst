@@ -1,20 +1,23 @@
 
 .. _api:
 
-semaphore Reference
-=========================
+API
+===
 
 .. _api-main:
 
-Main
-----
+Targeting Flags
+---------------
 
-.. automodule:: semaphore.flags
+.. automodule:: sdss_semaphore.targeting
    :members:
-   :undoc-members:
+   :exclude-members: mapping, dtype
+   :inherited-members: 
    :show-inheritance:
 
-.. automodule:: semaphore.reference
+Base Flags
+----------
+
+.. automodule:: sdss_semaphore
    :members:
-   :undoc-members:
-   :show-inheritance:
+   :show-inheritance: 

@@ -27,7 +27,7 @@ The current version is |semaphore_version|. You can install the package by doing
 Notebooks
 ---------
 
-[Targeting flags](https://github.com/sdss/semaphore/blob/main/notebooks/20231011_sdss5_targeting.ipynb)
+- `Targeting flags <https://github.com/sdss/semaphore/blob/main/notebooks/20231011_sdss5_targeting.ipynb>`_
 
 
 Reference
