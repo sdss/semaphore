@@ -34,7 +34,15 @@ class BaseTargetingFlags(BaseFlags):
     def all_alt_programs(self) -> Tuple[str]:
         """Return a list of all alternative carton programs."""
         return self._all_attributes("alt_program")
+    
+    def in_carton_label(self, label: str) -> np.array:
+        """
+        Return a N-length boolean array indicating whether the items are assigned to the carton with the given label.
         
+        :param label:
+            The carton label.
+        """
+        return self.is_attribute_set("label", label)
 
     def in_carton_pk(self, carton_pk: int) -> np.array:
         """
@@ -45,7 +53,7 @@ class BaseTargetingFlags(BaseFlags):
         """
         return self.is_attribute_set("carton_pk", carton_pk)
 
-    def in_carton_name(self, name) -> np.array:
+    def in_carton_name(self, name: str) -> np.array:
         """
         Return an N-length boolean array indicating whether the items are assigned to a carton with the given name.
         
@@ -54,7 +62,7 @@ class BaseTargetingFlags(BaseFlags):
         """
         return self.is_attribute_set("name", name)
 
-    def in_mapper(self, mapper) -> np.array:
+    def in_mapper(self, mapper: str) -> np.array:
         """
         Return an N-length boolean array indicating whether the items are assigned to any cartons with the given mapper.
         
@@ -63,7 +71,7 @@ class BaseTargetingFlags(BaseFlags):
         """
         return self.is_attribute_set("mapper", mapper)
 
-    def in_program(self, program) -> np.array:
+    def in_program(self, program: str) -> np.array:
         """
         Return an N-length boolean array indicating whether the items are assigned to any cartons with the given program.
         
@@ -72,7 +80,7 @@ class BaseTargetingFlags(BaseFlags):
         """
         return self.is_attribute_set("program", program)
     
-    def in_alt_name(self, alt_name) -> np.array:
+    def in_alt_name(self, alt_name: str) -> np.array:
         """
         Return an N-length boolean array indicating whether the items are assigned to any cartons with the given alternative name.
 
@@ -81,7 +89,7 @@ class BaseTargetingFlags(BaseFlags):
         """
         return self.is_attribute_set("alt_name", alt_name)        
 
-    def in_alt_program(self, alt_program) -> np.array:
+    def in_alt_program(self, alt_program: str) -> np.array:
         """
         Return an N-length boolean array indicating whether the items are assigned to any cartons with the given alternative program.
 
@@ -115,11 +123,11 @@ class BaseTargetingFlags(BaseFlags):
         :param carton_pk:
             The carton primary key.        
         """
-        bit = self.get_bit_position_from_carton_pk[carton_pk]
+        bit = self.bit_position_from_carton_pk[carton_pk]
         return self.set_bit(index, bit)
 
     @cached_property
-    def get_bit_position_from_carton_pk(self):
+    def bit_position_from_carton_pk(self):
         """
         Return a dictionary with carton primary keys as keys, and bit positions as values.
         

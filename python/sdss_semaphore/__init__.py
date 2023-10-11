@@ -24,16 +24,16 @@ class BaseFlags:
                 self.array[i, :len(item)] = np.frombuffer(item, dtype=self.dtype)
         elif len(array) > 0 and isinstance(array[0], BaseFlags):
             # need to pad the array to the maximum size
-            N, F = (0, 0)
+            N, F, si = (0, 0, 0)
             for item in array:
                 n, f = item.array.shape
                 F = max(F, f)
                 N += n
-            if N != len(array):
-                raise ValueError("All items must have only one row when building from an iterable of BaseFlags")
             self.array = np.zeros((N, F), dtype=self.dtype)
-            for i, item in enumerate(array):
-                self.array[i, :item.array.shape[1]] = item.array
+            for item in array:
+                n, f = item.array.shape
+                self.array[si:si + n, :f] = item.array
+                si += n            
         else:
             self.array = np.atleast_2d(array).astype(self.dtype)
         return None
@@ -74,6 +74,7 @@ class BaseFlags:
             yield tuple(self.mapping[bit] for bit in np.where(row)[0])
         
     def _all_attributes(self, key):
+        """Helper function to return unique set of attributes for all flags."""
         return tuple(set(attrs[key] for attrs in self.mapping.values()))
 
     def count(self, skip_empty: bool = False) -> dict:
