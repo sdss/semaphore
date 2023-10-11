@@ -1,4 +1,4 @@
-__version__ = "0.2.2"
+__version__ = "0.2.3"
 
 import numpy as np
 import warnings
@@ -9,7 +9,7 @@ class BaseFlags:
 
     """A base class for communicating with flags."""
 
-    def __init__(self, array: Optional[Union[np.ndarray, Iterable[Iterable[int]], Iterable[bytearray]]] = None) -> None:
+    def __init__(self, array: Optional[Union[np.ndarray, Iterable[Iterable[int]], Iterable[bytearray], Iterable['BaseFlags']]] = None) -> None:
         if array is None:
             # Assume single object flag.
             self.array = np.zeros((1, 0), dtype=self.dtype)
@@ -22,6 +22,18 @@ class BaseFlags:
             self.array = np.zeros((N, F), dtype=self.dtype)
             for i, item in enumerate(array):
                 self.array[i, :len(item)] = np.frombuffer(item, dtype=self.dtype)
+        elif len(array) > 0 and isinstance(array[0], BaseFlags):
+            # need to pad the array to the maximum size
+            N, F = (0, 0)
+            for item in array:
+                n, f = item.array.shape
+                F = max(F, f)
+                N += n
+            if N != len(array):
+                raise ValueError("All items must have only one row when building from an iterable of BaseFlags")
+            self.array = np.zeros((N, F), dtype=self.dtype)
+            for i, item in enumerate(array):
+                self.array[i, :item.array.shape[1]] = item.array
         else:
             self.array = np.atleast_2d(array).astype(self.dtype)
         return None
@@ -85,9 +97,8 @@ class BaseFlags:
             Skip flags with no items assigned to them.        
         """        
         counts = {}
-        flags = self.as_boolean_array() # (N, F) shape
         for attribute, bits in bits_per_attribute.items():
-            count = np.sum(np.any(flags[:, bits], axis=1))
+            count = np.sum(self.are_any_bits_set(bits))
             if count > 0 or not skip_empty:
                 counts[attribute] = count            
         return counts
