@@ -296,3 +296,7 @@ class BaseFlags:
     def __repr__(self):
         N, B = self.array.shape
         return f"<{self.__class__.__name__} with {N:,} items and up to {B * self.n_bits:,} flags ({len(self.mapping):,} defined) at {hex(id(self))}>"
+
+    def __len__(self):
+        N, B = self.array.shape
+        return N
