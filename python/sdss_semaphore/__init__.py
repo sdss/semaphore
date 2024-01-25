@@ -1,4 +1,4 @@
-__version__ = "0.2.3"
+__version__ = "0.2.4"
 
 import numpy as np
 import warnings
@@ -68,6 +68,11 @@ class BaseFlags:
         else:
             self.array = np.atleast_2d(array).astype(self.dtype)
         return None
+
+    def __getitem__(self, index: int):
+        if isinstance(index, tuple):
+            raise IndexError("too many indices for array; you can only slice on items")
+        return self.__class__(self.array[[index]])
 
     @property
     def dtype(self):
