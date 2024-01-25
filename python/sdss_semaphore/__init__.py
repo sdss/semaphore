@@ -202,7 +202,10 @@ class BaseFlags:
         if len(bits) == 0:
             raise ValueError(f"No bits found with attribute {key}={value}")
         num, offset = np.divmod(bits, self.n_bits)
-        return np.any(self.array[:, num] & (1 << offset), axis=1)
+        N, B = self.array.shape
+        can_be_set = B > num
+        return np.any(self.array[:, num[can_be_set]] & (1 << offset[can_be_set]), axis=1)
+
     
     def get_bits_with_attribute(self, key, value) -> List[int]:
         """
@@ -343,6 +346,3 @@ class BaseFlags:
     def __len__(self):
         N, B = self.array.shape
         return N
-    
-    
-    
