@@ -1,6 +1,6 @@
 import numpy as np
 from typing import Tuple
-
+from os import getenv
 from sdss_semaphore import BaseFlags, cached_class_property
 
 class BaseTargetingFlags(BaseFlags):
@@ -137,7 +137,7 @@ class TargetingFlags(BaseTargetingFlags):
     """Communicating with SDSS-V targeting flags."""
 
     dtype, n_bits = (np.uint8, 8)
-    MAPPING_BASENAME = "sdss5_target_2_with_groups.csv"
+    MAPPING_BASENAME = f"sdss5_target_{getenv('SDSSC2VB', default=2)}_with_groups.csv"
 
     # TODO: Metadata about mapping version should be stored in the MAPPING_BASENAME file
     #       and be assigned as a cached class property once the file is loaded.
