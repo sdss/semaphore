@@ -3,7 +3,7 @@ __version__ = "0.2.5"
 import numpy as np
 import warnings
 from typing import Dict, Union, Tuple, Iterable, List, Optional, Tuple
-from pkg_resources import resource_filename
+import importlib.resources as resources
 
 
 
@@ -88,7 +88,12 @@ class BaseFlags:
         
         # TODO: The format and content of the mapping file is TBD. Here we will just load the CSV we have.
         #       Once we have finalized the format and content, move this import out and add dependency (fits/astropy).
-        path = resource_filename(__name__, f'etc/{self.MAPPING_BASENAME}')
+        try: #python 3.9+
+            path = resources.files(__name__).joinpath('etc',f'{self.MAPPING_BASENAME}')
+        except: #python 3.7 and 3.8
+            with resources.path(__name__+'.etc', self.MAPPING_BASENAME) as path:
+                path = str(path)
+        #path = resource_filename(__name__, f'etc/{self.MAPPING_BASENAME}')
         from astropy.table import Table
         
         mapping = {}
