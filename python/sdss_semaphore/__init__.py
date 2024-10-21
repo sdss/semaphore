@@ -82,6 +82,10 @@ class BaseFlags:
     def n_bits(self):
         raise NotImplementedError(f"`n_bits` must be defined in subclass")
 
+    @property
+    def MAPPING_BASENAME(self):
+        raise NotImplementedError(f"`MAPPING_BASENAME` must be defined in subclass")
+
     @cached_class_property
     def mapping(self) -> dict:
         """A dictionary containing bit positions as keys, and dictionaries of flag attributes as values."""
