@@ -199,6 +199,36 @@ class BaseFlags:
         self.array = self.array[:, :index]
         return self
 
+    def get_attribute(self, key, index: Union[int, List[int], np.ndarray] = None) -> Tuple:
+        """
+        Return a list of the set values for a key for a single target
+        
+        :param key:
+            The attribute key.
+        
+        :param index:
+            The index of the target in the Targeting Flag
+        
+        :returns:
+            A list of the requested attibute for the stet flags
+        """
+        if index is None:
+            _flags = self
+        elif isinstance(index, (int, np.integer)):
+            # Single index case
+            _flags = self[index]
+        elif isinstance(index, (list, np.ndarray)):
+            _flags = [self[i] for i in index]
+        elif isinstance(index, np.ndarray):
+            _flags = [self[i] for i in index.tolist()]  # Convert numpy array to list and index
+        else:
+            raise TypeError("Index must be an int, a list of ints, or a numpy array of ints.")
+
+        return tuple([[d[key] for d in t_of_d if key in d]
+                      for _flag in _flags for t_of_d in _flag.flags_set])
+
+
+        
     def is_attribute_set(self, key, value) -> np.array:
         """
         Return a N-length boolean array indicating whether the item has any flag with the given attribute.
