@@ -1,6 +1,5 @@
 import numpy as np
-from typing import Tuple
-
+from typing import Union, Tuple, List
 from sdss_semaphore import BaseFlags, cached_class_property
 
 class BaseTargetingFlags(BaseFlags):
@@ -94,6 +93,90 @@ class BaseTargetingFlags(BaseFlags):
             The alternative program name.
         """
         return self.is_attribute_set("alt_program", alt_program)
+
+    def get_carton_pk(self, index: int = None) -> Tuple[str]:
+        """
+        Returns the Tuple of list of carton pks for a target
+        If a list or numpy array of indices is provided, it returns a list of 1-element Tuples,
+            each matching the corresponding index.
+
+        :param index:
+            The index of the Target in the TargetingFlag array
+        """
+        return self.get_attribute("carton_pk", index)
+
+    def get_carton_label(self, index: Union[int, List[int], np.ndarray] = None) -> Tuple[str]:
+        """
+        Returns the Tuple of list of carton cables for a target
+        If an index is provided it returns a 1-element Tuple matching that index
+        If a list or numpy array of indices is provided, it returns a list of 1-element Tuples,
+            each matching the corresponding index.
+
+        :param index:
+            The index or indices of the Target in the TargetingFlag array
+        """
+        
+        return self.get_attribute("label", index)
+
+    def get_carton_name(self, index: int = None) -> Tuple[str]:
+        """
+        Returns the Tuple of list of cartons names for a target
+        If an index is provided it returns a 1-element Tuple matching that index
+        If a list or numpy array of indices is provided, it returns a list of 1-element Tuples,
+            each matching the corresponding index.
+
+        :param index:
+            The index of the Target in the TargetingFlag array
+        """
+        return self.get_attribute("name", index)
+
+    def get_mapper(self, index: int = None) -> Tuple[str]:
+        """
+        Returns the Tuple of list of mappers for a target
+        If an index is provided it returns a 1-element Tuple matching that index
+        If a list or numpy array of indices is provided, it returns a list of 1-element Tuples,
+            each matching the corresponding index.
+
+        :param index:
+            The index of the Target in the TargetingFlag array
+        """
+        return self.get_attribute("mapper", index)
+
+    def get_program(self, index: int = None) -> Tuple[str]:
+        """
+        Returns the Tuple of list of alt_program for a target
+        If an index is provided it returns a 1-element Tuple matching that index
+        If a list or numpy array of indices is provided, it returns a list of 1-element Tuples,
+            each matching the corresponding index.
+
+        :param index:
+            The index of the Target in the TargetingFlag array
+        """
+        return self.get_attribute("program", index)
+        
+    def get_alt_name(self, index: int = None) -> Tuple[str]:
+        """
+        Returns the Tuple of list of alt_name for a target
+        If an index is provided it returns a 1-element Tuple matching that index
+        If a list or numpy array of indices is provided, it returns a list of 1-element Tuples,
+            each matching the corresponding index.
+
+        :param index:
+            The index of the Target in the TargetingFlag array
+        """
+        return self.get_attribute("alt_name", index)
+
+    def get_alt_program(self, index: int = None) -> Tuple[str]:
+        """
+        Returns the Tuple of list of alt_program for a target
+        If an index is provided it returns a 1-element Tuple matching that index
+        If a list or numpy array of indices is provided, it returns a list of 1-element Tuples,
+            each matching the corresponding index.
+
+        :param index:
+            The index of the Target in the TargetingFlag array
+        """
+        return self.get_attribute("alt_name", index)
 
     def count(self, skip_empty: bool = False) -> dict:
         """
