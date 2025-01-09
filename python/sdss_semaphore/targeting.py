@@ -1,8 +1,8 @@
 import numpy as np
 import os
 import warnings
-from typing import Union, Tuple, Iterable, Optional
-from sdss_semaphore import BaseFlags, cached_class_property
+from typing import Union, Tuple, Iterable, Optional, List
+from sdss_semaphore import BaseFlags, cached_class_property, logger
 import importlib.resources as resources
 
 class BaseTargetingFlags(BaseFlags):
@@ -218,7 +218,7 @@ class BaseTargetingFlags(BaseFlags):
         """
         return { attrs["carton_pk"]: bit for bit, attrs in self.mapping.items() }
 
-    @property
+    @cached_class_property
     def version(self):
         raise NotImplementedError(f"`version` must be defined in subclass")
         
@@ -233,6 +233,10 @@ class BaseTargetingFlags(BaseFlags):
     @classmethod
     def set_version(cls, version: int):
         """Set the SDSSC2BV value and reload the mapping."""
+        if getattr(cls, "version", None) == version and hasattr(cls, "_mapping_"):
+            # If the version matches the current one and the mapping is cached, do nothing
+            return
+        
         MAPPING_BASENAME = cls._MAPPING_BASENAME.format(version = version)
         try: #python 3.9+
             path = resources.files(__name__.split('.')[0]).joinpath('etc',f'{MAPPING_BASENAME}')
@@ -246,7 +250,10 @@ class BaseTargetingFlags(BaseFlags):
                 InvalidVersionWarning)
             cls.MAPPING_BASENAME = cls._MAPPING_BASENAME.format(version = cls.version)
             return
+ 
+        logger.debug(f"Using {cls._ver_name}={version} from {path}")
         cls.version = version
+        cls.MAPPING_PATH = os.path.dirname(path)
         cls.MAPPING_BASENAME = MAPPING_BASENAME
 
         # Clear the cached mapping so it will be reloaded
@@ -271,10 +278,15 @@ class TargetingFlags(BaseTargetingFlags):
     
     # TODO: Update this file once we have finalised the format and content.
 
-    def __init__(self, array: Optional[Union[np.ndarray, Iterable[Iterable[int]], Iterable[bytearray], Iterable['BaseFlags']]] = None,
-                 sdssc2bv: Optional[int] = None) -> None:
+    def __init__(self,
+                 array: Optional[Union[np.ndarray, Iterable[Iterable[int]],
+                                 Iterable[bytearray], Iterable['BaseFlags']]] = None, #Flag array
+                 sdssc2bv: Optional[int] = None, #manually set the Carton to bit version
+                 *params,  # *params for extra (unexpected) positional arguments
+                 **kwargs  # **kwargs for extra (unexpected) keyword arguments
+                 ) -> None:
         """Initialize TargetingFlags with an optional sdssc2bv value."""
         if sdssc2bv is None:
-            sdssc2bv = int(os.getenv('SDSSC2BV', default=2))
+            sdssc2bv = int(os.getenv('SDSSC2BV', default=self.version))
         self.set_version(sdssc2bv)
         super().__init__(array)
