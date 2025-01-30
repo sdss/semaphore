@@ -269,7 +269,7 @@ class TargetingFlags(BaseTargetingFlags):
     """Communicating with SDSS-V targeting flags."""
 
     dtype, n_bits = (np.uint8, 8)
-    version = 2
+    version = 3
     _ver_name = 'SDSSC2BV'
     _MAPPING_BASENAME = "sdss5_target_{version}_with_groups.csv"
         
