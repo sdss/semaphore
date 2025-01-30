@@ -2,9 +2,16 @@ __version__ = "0.2.5"
 
 import numpy as np
 import warnings
+import os.path as ptt
 from typing import Dict, Union, Tuple, Iterable, List, Optional, Tuple
-from pkg_resources import resource_filename
+import importlib.resources as resources
+import logging
 
+
+logger = logging.getLogger(__name__)
+def setup_logging(level=logging.DEBUG):
+    """Quickly configure logging for debugging purposes."""
+    logging.basicConfig(level=level, format="%(asctime)s - %(name)s - %(funcName)s - %(levelname)s - %(message)s")
 
 
 class cached_class_property:
@@ -83,16 +90,27 @@ class BaseFlags:
         raise NotImplementedError(f"`n_bits` must be defined in subclass")
 
     @cached_class_property
+    def MAPPING_PATH(self):
+        raise NotImplementedError(f"`MAPPING_PATH` must be defined in subclass")
+
+    @cached_class_property
+    def MAPPING_BASENAME(self):
+        raise NotImplementedError(f"`MAPPING_BASENAME` must be defined in subclass")
+
+    @cached_class_property
     def mapping(self) -> dict:
         """A dictionary containing bit positions as keys, and dictionaries of flag attributes as values."""
-        
+
+        """Load and cache the mapping file."""
+        if not hasattr(self, "MAPPING_PATH") or self.MAPPING_PATH is None:
+            raise RuntimeError("Mapping path is not set. Call `set_version` first.")
+
         # TODO: The format and content of the mapping file is TBD. Here we will just load the CSV we have.
         #       Once we have finalized the format and content, move this import out and add dependency (fits/astropy).
-        path = resource_filename(__name__, f'etc/{self.MAPPING_BASENAME}')
+        logger.debug('Reading: '+ptt.join(self.MAPPING_PATH, self.MAPPING_BASENAME))
         from astropy.table import Table
-        
         mapping = {}
-        for row in Table.read(path):
+        for row in Table.read(ptt.join(self.MAPPING_PATH, self.MAPPING_BASENAME)):
             row_dict = dict(zip(row.colnames, row))
             mapping[row_dict["bit"]] = row_dict
         return mapping
