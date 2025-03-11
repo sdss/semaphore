@@ -545,3 +545,5 @@ openfibertargets_mwm_ztf_lomb_boss_1.2.13,542,1815,2,open_fiber,1.2.13,12.13,ope
 openfibertargets_mwm_ztf_scope_apogee_1.2.13,543,1816,2,open_fiber,1.2.13,12.13,openfibertargets_mwm_ztf_scope_apogee,mwm,open_fiber,mwm_ztf_openfiber
 openfibertargets_mwm_ztf_scope_boss_1.2.13,544,1817,2,open_fiber,1.2.13,12.13,openfibertargets_mwm_ztf_scope_boss,mwm,open_fiber,mwm_ztf_openfiber
 bhm_colr_galaxies_lsdr10_d3_1.2.16,545,1818,2,bhm_filler,1.2.16,12.16,bhm_colr_galaxies_lsdr10_d3,bhm,filler,bhm_filler
+manual_mwm_boss_only_cluster_jan_2025_high_priority_1.2.17,546,1819,2,open_fiber,1.2.17,12.17,manual_mwm_boss_only_cluster_jan_2025_high_priority,mwm,cluster,mwm_cluster
+manual_mwm_boss_only_cluster_jan_2025_low_priority_1.2.17,547,1820,2,open_fiber,1.2.17,12.17,manual_mwm_boss_only_cluster_jan_2025_low_priority,mwm,cluster,mwm_cluster
