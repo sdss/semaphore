@@ -51,11 +51,14 @@ class BaseFlags:
         if array is None:
             # Assume single object flag.
             self.array = np.zeros((1, 0), dtype=self.dtype)
-        elif isinstance(array, (list, tuple)) and isinstance(array[0], bytearray):
+        elif isinstance(array, (list, tuple)) and (isinstance(array[0], (bytearray, str)):
             # TODO: If the self.dtype is not uint8, then we might need to compute these initial offsets ourselves,
             #       because I think bytearray is natively uint8
             if self.dtype != np.uint8:
                 warnings.warn("Converting from list of bytearrays to integer array, but `dtype` is not uint8. Hold on to your butts.")
+            if isinstance(array[0], str):
+                logger.warning("Warning: Converting from string to bytearrays assuming string is hexadecimal")
+                array = [np.frombuffer(bytes.fromhex(h), dtype=np.uint8) for h in np.atleast_1d(array)]
             N, F = (len(array), max(len(item) for item in array))
             self.array = np.zeros((N, F), dtype=self.dtype)
             for i, item in enumerate(array):
