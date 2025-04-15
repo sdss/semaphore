@@ -4,14 +4,10 @@
 import numpy as np
 from pytest import mark, raises
 from unittest import mock
+import os
 
 from astropy.table import Table
 
-import sys
-sys.path.insert(0,"/uufs/chpc.utah.edu/common/home/u6037107/github/semaphore/hex2flags/python")
-#sys.path.insert(0,"/uufs/chpc.utah.edu/common/home/sdss50/software/git/sdss/semaphore/0.2.5/python")
-import os
-os.environ['SDSSC2BV'] = '3'
 
 from sdss_semaphore.targeting import TargetingFlags
 from sdss_semaphore import BaseFlags, cached_class_property
