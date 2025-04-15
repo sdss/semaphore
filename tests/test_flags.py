@@ -4,6 +4,8 @@
 import numpy as np
 from pytest import mark, raises
 from unittest import mock
+from pathlib import Path
+import contextlib
 import os
 
 from astropy.table import Table
@@ -123,19 +125,45 @@ def test_base_mapping_basename_raises():
 
 
 
-def test_get_mapping_path_uses_fallback():
+@mark.parametrize("python_version, files_function", [
+    ('3.7', 'side_effect'),  # Simulate older Python versions where files() fails
+    ('3.8', 'side_effect'),
+    ('3.9', 'normal')        # Simulate working files() in Python 3.9+
+])
+def test_get_mapping_path(python_version, files_function):
     mock_file = "/mocked/fallback/path/sdss5_target_1_with_groups.csv"
 
-    with mock.patch("importlib.resources.files", side_effect=AttributeError), \
-         mock.patch("importlib.resources.path") as mock_path, \
-         mock.patch("os.path.exists", return_value=True):
+    with contextlib.ExitStack() as stack:
+        # Conditionally patch `importlib.resources.files` if it exists
+        if hasattr(sys.modules['importlib.resources'], 'files'):
+            if files_function == 'side_effect':
+                stack.enter_context(
+                    mock.patch("importlib.resources.files", side_effect=AttributeError)
+                )
+            else:
+                mock_files = mock.MagicMock()
+                mock_files.joinpath.return_value = Path(mock_file)
+                stack.enter_context(
+                    mock.patch("importlib.resources.files", return_value=mock_files)
+                )
 
+        # Always patch `resources.path`
+        mock_path = stack.enter_context(
+            mock.patch("importlib.resources.path")
+        )
+
+        # Mock the context manager returned by path()
         mock_ctx = mock.MagicMock()
         mock_ctx.__enter__.return_value = mock_file
         mock_path.return_value = mock_ctx
 
-        TargetingFlags.set_version(1)
+        # Patch os.path.exists to always return True
+        stack.enter_context(
+            mock.patch("os.path.exists", return_value=True)
+        )
 
-        # Assertions on side effects
-        assert TargetingFlags.MAPPING_PATH == os.path.dirname(mock_file)
-        assert TargetingFlags.MAPPING_BASENAME == "sdss5_target_1_with_groups.csv"
+        # Now run the test logic
+        g = TargetingFlags(sdssc2bv=1)
+
+        assert g.MAPPING_PATH == os.path.dirname(mock_file)
+        assert g.MAPPING_BASENAME == "sdss5_target_1_with_groups.csv"

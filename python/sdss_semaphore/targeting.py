@@ -241,8 +241,12 @@ class BaseTargetingFlags(BaseFlags):
         try: #python 3.9+
             path = resources.files(__name__.split('.')[0]).joinpath('etc',f'{MAPPING_BASENAME}')
         except: #python 3.7,3.8
-            with resources.path(__name__.split('.')[0]+'.etc', f'{MAPPING_BASENAME}') as path:
-                path = str(path)
+            try:
+                with resources.path(__name__.split('.')[0]+'.etc', f'{MAPPING_BASENAME}') as path:
+                    path = str(path)
+            except FileNotFoundError:
+                path = ''
+
             
         if not os.path.exists(path):
             warnings.warn(
