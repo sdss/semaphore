@@ -7,7 +7,7 @@ from unittest import mock
 from pathlib import Path
 import contextlib
 import os
-
+import sys
 from astropy.table import Table
 
 
