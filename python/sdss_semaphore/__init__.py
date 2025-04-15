@@ -357,7 +357,9 @@ class BaseFlags:
         num, offset = np.divmod(bit, self.n_bits)
         N, B = self.array.shape
         is_set_able = B > num
-        self.array[index, num[is_set_able]] &= ~(1 << offset[is_set_able])
+        offset = offset[is_set_able]
+        mask = ~(np.left_shift(1, offset)).astype(self.dtype)
+        self.array[index, num] &= mask
         return self
     
     def toggle_bit(self, index, bit):

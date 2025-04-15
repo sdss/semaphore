@@ -179,7 +179,7 @@ class BaseTargetingFlags(BaseFlags):
         :param index:
             The index of the Target in the TargetingFlag array
         """
-        return self.get_attribute("alt_name", index)
+        return self.get_attribute("alt_program", index)
 
     def count(self, skip_empty: bool = False) -> dict:
         """
