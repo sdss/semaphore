@@ -55,7 +55,7 @@ jobs:
     #   with:
     #     file: ./coverage.xml
 
-  test-3.7:
+  test-37:
 
     runs-on: ubuntu-20.04 
 
