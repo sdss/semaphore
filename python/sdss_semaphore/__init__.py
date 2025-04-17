@@ -7,12 +7,6 @@ from typing import Dict, Union, Tuple, Iterable, List, Optional, Tuple
 import importlib.resources as resources
 import logging
 
-import sys
-sys.path.insert(0,"/uufs/chpc.utah.edu/common/home/u6037107/github/semaphore/hex2flags/python")
-#sys.path.insert(0,"/uufs/chpc.utah.edu/common/home/sdss50/software/git/sdss/semaphore/0.2.5/python")
-import os
-os.environ['SDSSC2BV'] = '3'
-
 
 logger = logging.getLogger(__name__)
 def setup_logging(level=logging.DEBUG):
