@@ -179,7 +179,7 @@ class BaseTargetingFlags(BaseFlags):
         :param index:
             The index of the Target in the TargetingFlag array
         """
-        return self.get_attribute("alt_name", index)
+        return self.get_attribute("alt_program", index)
 
     def count(self, skip_empty: bool = False) -> dict:
         """
@@ -241,8 +241,12 @@ class BaseTargetingFlags(BaseFlags):
         try: #python 3.9+
             path = resources.files(__name__.split('.')[0]).joinpath('etc',f'{MAPPING_BASENAME}')
         except: #python 3.7,3.8
-            with resources.path(__name__.split('.')[0]+'.etc', f'{MAPPING_BASENAME}') as path:
-                path = str(path)
+            try:
+                with resources.path(__name__.split('.')[0]+'.etc', f'{MAPPING_BASENAME}') as path:
+                    path = str(path)
+            except FileNotFoundError:
+                path = ''
+
             
         if not os.path.exists(path):
             warnings.warn(

@@ -1,2 +1,2 @@
-recursive-include python/semaphore/etc *
+recursive-include python/sdss_semaphore/etc *
 recursive-include cextern/**/*
