@@ -575,3 +575,5 @@ openfibertargets_bhm_iragn2_boss_1.2.19,572,1860,4,open_fiber,1.2.19,12.19,openf
 openfibertargets_bhm_broadbcds2_boss_1.2.19,573,1861,4,open_fiber,1.2.19,12.19,openfibertargets_bhm_broadbcds2_boss,bhm,open_fiber,bhm_openfiber
 bhm_aqmes_wide3_1.2.20,574,1862,4,bhm_aqmes,1.2.20,12.2,bhm_aqmes_wide3,bhm,aqmes,bhm_aqmes
 bhm_aqmes_wide3_faint_1.2.20,575,1863,4,bhm_filler,1.2.20,12.2,bhm_aqmes_wide3_faint,bhm,aqmes,bhm_aqmes
+mwm_bin_rv_short_rgb_apogee_08epoch_1.2.12,576,1796,4,mwm_bin,1.2.12,12.12,mwm_bin_rv_short_rgb_apogee_08epoch,mwm,bin,mwm_bin_rv_short_rgb
+mwm_bin_rv_short_rgb_apogee_12epoch_1.2.12,577,1797,4,mwm_bin,1.2.12,12.12,mwm_bin_rv_short_rgb_apogee_12epoch,mwm,bin,mwm_bin_rv_short_rgb
