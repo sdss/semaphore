@@ -42,12 +42,26 @@ class cached_class_property:
             setattr(cls, self.__cache_name__, result)
             return result
 
+def _is_sequence_of_sequences(x):
+    try:
+        first = x[0]
+    except (TypeError, IndexError):
+        return False
+    
+    return (
+            isinstance(first, (list, tuple, np.ndarray))
+            and not isinstance(first, (str, bytes, bytearray))
+            )
+
 
 class BaseFlags:
 
     """A base class for communicating with flags."""
 
     def __init__(self, array: Optional[Union[np.ndarray, Iterable[Iterable[int]], Iterable[bytearray], Iterable['BaseFlags']]] = None) -> None:
+        if array is not None and hasattr(array, "to_pylist"):
+            # to handle pyarrow lists of lists
+            array = array.to_pylist()
         if array is None:
             # Assume single object flag.
             self.array = np.zeros((1, 0), dtype=self.dtype)
@@ -82,6 +96,19 @@ class BaseFlags:
             self.array = np.zeros((N, F), dtype=self.dtype)
             for i, item in enumerate(array):
                 self.array[i, :len(item)] = np.frombuffer(item, dtype=self.dtype)
+        elif _is_sequence_of_sequences(array):
+            # To handle a sequence of sequences that might be of unequal length
+            rows = [np.asarray(r, dtype=self.dtype) for r in array]
+            try:
+                # if they are of equal length
+                self.array = np.stack(rows)
+            except ValueError:
+                # if they are of unequal length (left pad to the length of the longest 
+                F = max(r.size for r in rows)
+                self.array = np.zeros((len(rows), F), dtype=self.dtype)
+                for i, row in enumerate(rows):
+                    offset = F - row.size
+                    self.array[i, offset:] = row
         else:
             self.array = np.atleast_2d(array).astype(self.dtype)
         return None
